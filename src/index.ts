@@ -134,16 +134,16 @@ export class EDCConnector {
       ENCODE_PATH: undefined,
     };
 
-    // management api config
+    // management api config — EDC 0.16.0 uses X-Api-Key header (edc.api.auth.key)
     const managementEndpointConfig: OpenAPIConfig = {
       BASE: managementApiEndpointUrl,
       VERSION: '7.1.0',
-      WITH_CREDENTIALS: true,
+      WITH_CREDENTIALS: false,
       CREDENTIALS: 'include',
       TOKEN: undefined,
-      USERNAME: username,
-      PASSWORD: password,
-      HEADERS: undefined,
+      USERNAME: undefined,
+      PASSWORD: undefined,
+      HEADERS: {'X-Api-Key': password},
       ENCODE_PATH: undefined,
     };
 

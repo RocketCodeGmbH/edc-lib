@@ -24,7 +24,9 @@
 import type { QuerySpecDto } from './QuerySpecDto.js';
 
 export type CatalogRequestDto = {
-    providerUrl: string;
+    counterPartyAddress: string;
+    counterPartyId: string;
+    protocol: string;
     querySpec?: QuerySpecDto;
 };
 

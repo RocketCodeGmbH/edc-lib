@@ -75,7 +75,7 @@ export class CatalogService {
   ): CancelablePromise<Catalog> {
     return __request(this.OpenAPI, {
       method: 'POST',
-      url: '/catalog/request',
+      url: '/v3/catalog/request',
       body: requestBody,
       mediaType: 'application/json',
     });
