@@ -43,10 +43,9 @@ import {VersionService} from './version-api/version-api/index.js';
 
 export {DataPlaneProvisionService};
 
-export interface EDCConnectorAuth {
-  username: string;
-  password: string;
-}
+export type EDCConnectorAuth =
+  | {username: string; password: string}
+  | {apiKey: string; apiKeyHeader?: string};
 
 export interface EDCConnectorOptions {
   controlPlane: {
@@ -89,8 +88,11 @@ export interface EDCDataPlane {
   readonly public: DataPlanePublicApiService;
 }
 
-function basicAuth(auth?: EDCConnectorAuth): Record<string, string> {
+function buildAuthHeaders(auth?: EDCConnectorAuth): Record<string, string> {
   if (!auth) return {};
+  if ('apiKey' in auth) {
+    return {[auth.apiKeyHeader ?? 'X-Api-Key']: auth.apiKey};
+  }
   return {Authorization: `Basic ${btoa(`${auth.username}:${auth.password}`)}`};
 }
 
@@ -102,7 +104,7 @@ export class EDCConnector {
 
   constructor(options: EDCConnectorOptions) {
     const {controlPlane: cp, dataPlane: dp, healthUrl, auth} = options;
-    const headers = basicAuth(auth);
+    const headers = buildAuthHeaders(auth);
 
     const mgmtClient = createMgmtClient(
       createMgmtConfig({baseUrl: cp.managementUrl, headers})
