@@ -1,0 +1,51 @@
+openapi: 3.0.1
+info:
+  description: This contains the version API that provides information about the exact
+    version of the management API
+  title: Version API
+paths:
+  /v1/version:
+    get:
+      description: Gets the exact SemVer string of the Management API
+      operationId: getVersion
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecretOutput"
+          description: The secret
+      tags:
+      - Version
+components:
+  schemas:
+    SecretOutput:
+      type: object
+      example:
+        '@context':
+          '@vocab': https://w3id.org/edc/v0.0.1/ns/
+        '@id': secret-id
+        '@type': https://w3id.org/edc/v0.0.1/ns/Secret
+        value: secret-value
+      properties:
+        '@id':
+          type: string
+        '@type':
+          type: string
+          example: https://w3id.org/edc/v0.0.1/ns/Secret
+        https://w3id.org/edc/v0.0.1/ns/value:
+          type: string
+      required:
+      - https://w3id.org/edc/v0.0.1/ns/value
+    VersionRecord:
+      type: object
+      properties:
+        lastUpdated:
+          type: string
+          format: date-time
+        maturity:
+          type: string
+        urlPath:
+          type: string
+        version:
+          type: string

@@ -1,0 +1,88 @@
+openapi: 3.0.1
+info:
+  version: v4alpha
+paths:
+  /v4alpha/protocol-versions/request:
+    post:
+      operationId: requestProtocolVersionV4alpha
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CatalogRequest"
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProtocolVersion"
+          description: Gets supported protocol versions of a single connector
+      tags:
+      - Protocol Version v4alpha
+components:
+  schemas:
+    CatalogRequest:
+      type: object
+      example:
+        '@context':
+          '@vocab': https://w3id.org/edc/v0.0.1/ns/
+        '@type': ProtocolVersionRequest
+        counterPartyAddress: http://provider-address
+        counterPartyId: providerId
+        protocol: dataspace-protocol-http
+      properties:
+        '@context':
+          type: object
+        '@type':
+          type: string
+          example: https://w3id.org/edc/v0.0.1/ns/CatalogRequest
+        counterPartyAddress:
+          type: string
+        counterPartyId:
+          type: string
+        protocol:
+          type: string
+      required:
+      - '@context'
+      - counterPartyAddress
+      - counterPartyId
+      - protocol
+    JsonObject:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/JsonValue"
+      properties:
+        empty:
+          type: boolean
+        valueType:
+          type: string
+          enum:
+          - ARRAY
+          - OBJECT
+          - STRING
+          - NUMBER
+          - "TRUE"
+          - "FALSE"
+          - "NULL"
+    JsonValue:
+      type: object
+      properties:
+        valueType:
+          type: string
+          enum:
+          - ARRAY
+          - OBJECT
+          - STRING
+          - NUMBER
+          - "TRUE"
+          - "FALSE"
+          - "NULL"
+    ProtocolVersion:
+      type: object
+      description: Protocol Version
+      example:
+        protocolVersions:
+        - version: 2024/1
+          path: /2024/1
+        - version: v0.8
+          path: /

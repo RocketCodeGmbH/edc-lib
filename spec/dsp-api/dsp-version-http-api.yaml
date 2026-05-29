@@ -1,0 +1,10 @@
+openapi: 3.0.1
+paths:
+  /.well-known/dspace-version:
+    get:
+      operationId: getProtocolVersions
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
