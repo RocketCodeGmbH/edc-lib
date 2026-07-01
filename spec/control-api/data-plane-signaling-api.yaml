@@ -1,0 +1,269 @@
+openapi: 3.0.1
+tags:
+- description: 'Api targeted by the Control Plane to delegate a data transfer to the
+    Data Plane after the contract has been successfully negotiated and agreed between
+    the two participants. '
+  name: Data Plane Signaling api API
+paths:
+  /v1/dataflows:
+    post:
+      description: "Initiates a data transfer for the given start message. If the\
+        \ data transfer is handled by the data plane, it will be performed asynchronously.\
+        \ If it's a consumer-pull scenario, a data address will be returned"
+      operationId: start
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DataFlowStartMessage"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataFlowResponseMessage"
+          description: Data transfer initiated
+        "400":
+          description: Failed to validate request
+      tags:
+      - Data Plane Signaling api API
+  /v1/dataflows/check:
+    get:
+      description: Check if data plane is available.
+      operationId: checkAvailability
+      responses:
+        "204":
+          description: Data plane is available
+      tags:
+      - Data Plane Signaling api API
+  /v1/dataflows/{id}/state:
+    get:
+      description: Get the current state of a data transfer.
+      operationId: getTransferState
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataFlowState"
+          description: State of the data transfer
+        "404":
+          description: Data transfer not found in the data plane
+      tags:
+      - Data Plane Signaling api API
+  /v1/dataflows/{id}/suspend:
+    post:
+      description: Suspend a data transfer.
+      operationId: suspend
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DataFlowSuspendMessage"
+      responses:
+        "204":
+          description: Data transfer suspended
+        "404":
+          description: Data transfer not handled by the data plane
+        "409":
+          description: Cannot suspend the transfer
+      tags:
+      - Data Plane Signaling api API
+  /v1/dataflows/{id}/terminate:
+    post:
+      description: Terminates a data transfer.
+      operationId: terminate
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DataFlowTerminateMessage"
+      responses:
+        "204":
+          description: Data transfer terminated
+        "404":
+          description: Data transfer not handled by the data plane
+        "409":
+          description: Cannot terminate the transfer
+      tags:
+      - Data Plane Signaling api API
+components:
+  schemas:
+    DataAddress:
+      type: object
+      example:
+        '@context':
+          '@vocab': https://w3id.org/edc/v0.0.1/ns/
+        '@type': https://w3id.org/edc/v0.0.1/ns/DataAddress
+        type: HttpData
+        baseUrl: http://example.com
+      properties:
+        '@type':
+          type: string
+          example: https://w3id.org/edc/v0.0.1/ns/DataAddress
+        type:
+          type: string
+    DataFlowResponseMessage:
+      type: object
+      example:
+        '@context':
+          '@vocab': https://w3id.org/edc/v0.0.1/ns/
+        '@type': DataFlowResponseMessage
+        dataAddress:
+          type: HttpData
+          baseUrl: https://jsonplaceholder.typicode.com/todos
+      properties:
+        '@context':
+          type: object
+        '@type':
+          type: string
+          example: DataFlowResponseMessage
+        dataAddress:
+          $ref: "#/components/schemas/DataAddress"
+    DataFlowStartMessage:
+      type: object
+      example:
+        '@context':
+          '@vocab': https://w3id.org/edc/v0.0.1/ns/
+        '@id': transfer-id
+        '@type': DataFlowStartMessage
+        processId: process-id
+        datasetId: dataset-id
+        participantId: participant-id
+        agreementId: agreement-id
+        transferType: HttpData-PUSH
+        sourceDataAddress:
+          type: HttpData
+          baseUrl: https://jsonplaceholder.typicode.com/todos
+        destinationDataAddress:
+          type: HttpData
+          baseUrl: https://jsonplaceholder.typicode.com/todos
+        callbackAddress: http://control-plane
+        properties:
+          key: value
+      properties:
+        '@context':
+          type: object
+        '@id':
+          type: string
+        '@type':
+          type: string
+          example: DataFlowStartMessage
+        agreementId:
+          type: string
+        callbackAddress:
+          type: string
+        datasetId:
+          type: string
+        destinationDataAddress:
+          $ref: "#/components/schemas/DataAddress"
+        participantId:
+          type: string
+        processId:
+          type: string
+        properties:
+          $ref: "#/components/schemas/Properties"
+        sourceDataAddress:
+          $ref: "#/components/schemas/DataAddress"
+        transferType:
+          type: string
+      required:
+      - '@context'
+      - agreementId
+      - datasetId
+      - participantId
+      - processId
+      - properties
+      - sourceDataAddress
+      - transferType
+    DataFlowState:
+      type: object
+      example:
+        '@context':
+          '@vocab': https://w3id.org/edc/v0.0.1/ns/
+        '@type': DataFlowState
+        state: STARTED
+      properties:
+        '@context':
+          type: object
+        '@type':
+          type: string
+          example: DataFlowState
+        state:
+          type: string
+    DataFlowSuspendMessage:
+      type: object
+      example:
+        '@context':
+          '@vocab': https://w3id.org/edc/v0.0.1/ns/
+        '@type': DataFlowSuspendMessage
+        reason: reason
+      properties:
+        '@type':
+          type: string
+          example: DataFlowSuspendMessage
+        state:
+          type: string
+    DataFlowTerminateMessage:
+      type: object
+      example:
+        '@context':
+          '@vocab': https://w3id.org/edc/v0.0.1/ns/
+        '@type': DataFlowTerminateMessage
+        reason: reason
+      properties:
+        '@type':
+          type: string
+          example: DataFlowTerminateMessage
+        state:
+          type: string
+    JsonObject:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/JsonValue"
+      properties:
+        empty:
+          type: boolean
+        valueType:
+          type: string
+          enum:
+          - ARRAY
+          - OBJECT
+          - STRING
+          - NUMBER
+          - "TRUE"
+          - "FALSE"
+          - "NULL"
+    JsonValue:
+      type: object
+      properties:
+        valueType:
+          type: string
+          enum:
+          - ARRAY
+          - OBJECT
+          - STRING
+          - NUMBER
+          - "TRUE"
+          - "FALSE"
+          - "NULL"
+    Properties:
+      type: object

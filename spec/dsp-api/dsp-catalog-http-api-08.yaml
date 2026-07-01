@@ -1,0 +1,89 @@
+openapi: 3.0.1
+paths:
+  /catalog/datasets/{id}:
+    get:
+      operationId: getDataset
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+  /catalog/request:
+    post:
+      operationId: requestCatalog
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+      - in: query
+        name: continuationToken
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                $ref: "#/components/schemas/JsonValue"
+              properties:
+                empty:
+                  type: boolean
+                valueType:
+                  type: string
+                  enum:
+                  - ARRAY
+                  - OBJECT
+                  - STRING
+                  - NUMBER
+                  - "TRUE"
+                  - "FALSE"
+                  - "NULL"
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+components:
+  schemas:
+    JsonObject:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/JsonValue"
+      properties:
+        empty:
+          type: boolean
+        valueType:
+          type: string
+          enum:
+          - ARRAY
+          - OBJECT
+          - STRING
+          - NUMBER
+          - "TRUE"
+          - "FALSE"
+          - "NULL"
+    JsonValue:
+      type: object
+      properties:
+        valueType:
+          type: string
+          enum:
+          - ARRAY
+          - OBJECT
+          - STRING
+          - NUMBER
+          - "TRUE"
+          - "FALSE"
+          - "NULL"

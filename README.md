@@ -1,8 +1,8 @@
 # edc-lib
 
-edc-lib is a javascript library to control / interact with [Eclipse DataSpace Connector](https://github.com/eclipse-edc/Connector).
+edc-lib is a JavaScript/TypeScript library to control / interact with the [Eclipse Dataspace Connector](https://github.com/eclipse-edc/Connector).
 
-The library is implemented in TypeScript, but can be either used by Javascript or TypeScript. The client is implemented for server-side use with Node and uses node-fetch as the request library.
+The library is written in TypeScript and can be used from either JavaScript or TypeScript. It targets EDC **0.14.1** and is generated per API from the connector's official OpenAPI specs. It is intended for server-side use (Node >= 18) and relies on the runtime's built-in `fetch` — it has no runtime dependencies.
 
 ## Installation
 
@@ -12,30 +12,56 @@ npm i edc-lib
 
 ## Usage
 
+A single `EDCConnector` bundles the connector's APIs. Configure it with the connector's base URLs and, optionally, credentials — either basic auth (`{username, password}`) or an API key (`{apiKey, apiKeyHeader?}`, header defaults to `X-Api-Key`). Then call the per-API services.
+
 ```typescript
-let connectorController: EDCConnector;
+import {EDCConnector} from 'edc-lib';
 
-const connectorController = new new EDCConnector(
-  `https://localhost:8080/control`,
-  `https://localhost:8080/api/v1/data`,
-  username,
-  password
-)();
+const connector = new EDCConnector({
+  controlPlane: {
+    managementUrl: 'https://localhost:8181/management',
+    controlUrl: 'https://localhost:9191/control', // optional, defaults to managementUrl
+  },
+  auth: {apiKey: 'my-api-key'},
+});
 
-await connectorController.messagingService.sendIdsDescription(
-  'https://anotherConnectorsHostname:8080/api/ids/data'
-);
+// Register an asset on the management API
+const {data: asset} = await connector.controlPlane.assetService.createAssetV3({
+  body: {
+    '@context': {'@vocab': 'https://w3id.org/edc/v0.0.1/ns/'},
+    '@id': 'asset-1',
+    properties: {name: 'My dataset'},
+    dataAddress: {type: 'HttpData', baseUrl: 'https://example.com/data'},
+  },
+});
+
+// Request a remote connector's catalog
+const {data: catalog} = await connector.controlPlane.catalogService.requestCatalogV3({
+  body: {
+    '@context': {'@vocab': 'https://w3id.org/edc/v0.0.1/ns/'},
+    counterPartyAddress: 'https://provider:8282/protocol',
+    protocol: 'dataspace-protocol-http',
+  },
+});
+
+// Check the connector's health
+const {data: health} = await connector.observabilityService.checkHealth();
 ```
 
-## Credits
+The service groups are `connector.controlPlane` (assets, catalog, contract definitions / negotiations / agreements, policies, transfer processes, EDR cache, secrets, data-plane selector, …), `connector.dataPlane` (provision and public data-plane APIs), `connector.observabilityService`, and `connector.versionService`.
 
-The typescript models and services in this library have been initially generated from the official OpenAPI Spec with the help of [openapi-typescript-codegen](https://github.com/ferdikoomen/openapi-typescript-codegen) and then have been further modified.
+## Regenerating the client
+
+The models and services are generated from the EDC OpenAPI specs with [@hey-api/openapi-ts](https://github.com/hey-api/openapi-ts). The emitted `*.gen.ts` files are not hand-edited — change the generator configuration and regenerate instead.
+
+```bash
+npm run generate   # regenerate the client from the specs
+npm run build      # generate + compile to build/
+```
 
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
 
 ## License
 

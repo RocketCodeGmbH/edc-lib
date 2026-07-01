@@ -1,0 +1,278 @@
+openapi: 3.0.1
+paths:
+  /v1/dataplanes:
+    get:
+      description: Returns a list of all currently registered data plane instances
+      operationId: getAllDataPlaneInstances
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DataPlaneInstanceSchema"
+          description: A (potentially empty) list of currently registered data plane
+            instances
+      tags:
+      - Dataplane Selector
+    post:
+      description: Register new Dataplane
+      operationId: registerDataplane
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DataPlaneInstanceSchema"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdResponse"
+          description: Dataplane successfully registered
+        "400":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: Request body was malformed
+        "409":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: Resource already exists
+      tags:
+      - Dataplane Selector
+  /v1/dataplanes/{id}:
+    delete:
+      description: Delete existing Dataplane
+      operationId: deleteDataplane
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Dataplane successfully deleted
+        "400":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: Request body was malformed
+        "404":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: Resource not found
+        "409":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: Conflict
+      tags:
+      - Dataplane Selector
+    get:
+      description: Returns the Data Plane Instance with the specified id.
+      operationId: findDataPlaneById
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataPlaneInstanceSchema"
+          description: The Data Plane Instance
+        "404":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: Resource not found
+      tags:
+      - Dataplane Selector
+  /v1/dataplanes/{id}/unregister:
+    put:
+      description: Unregister existing Dataplane
+      operationId: unregisterDataplane
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Dataplane successfully unregistered
+        "400":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: Request body was malformed
+        "404":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: Resource not found
+        "409":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: Conflict
+      tags:
+      - Dataplane Selector
+components:
+  schemas:
+    ApiErrorDetail:
+      type: object
+      example:
+        message: error message
+        type: ErrorType
+        path: object.error.path
+        invalidValue: this value is not valid
+      properties:
+        invalidValue:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        type:
+          type: string
+    DataPlaneInstanceSchema:
+      type: object
+      example:
+        '@context':
+          '@vocab': https://w3id.org/edc/v0.0.1/ns/
+        '@id': your-dataplane-id
+        url: http://somewhere.com:1234/api/v1
+        allowedSourceTypes:
+        - source-type1
+        - source-type2
+        allowedDestTypes:
+        - your-dest-type
+        allowedTransferTypes:
+        - transfer-type
+      properties:
+        '@context':
+          type: object
+        '@id':
+          type: string
+        '@type':
+          type: string
+          example: https://w3id.org/edc/v0.0.1/ns/DataPlaneInstance
+        allowedDestTypes:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+        allowedSourceTypes:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+        url:
+          type: string
+          format: url
+      required:
+      - '@context'
+      - '@id'
+      - allowedDestTypes
+      - allowedSourceTypes
+      - url
+    IdResponse:
+      type: object
+      example:
+        '@context':
+          '@vocab': https://w3id.org/edc/v0.0.1/ns/
+        '@id': id-value
+        createdAt: 1688465655
+      properties:
+        '@id':
+          type: string
+        createdAt:
+          type: integer
+          format: int64
+    JsonArray:
+      type: array
+      items:
+        $ref: "#/components/schemas/JsonValue"
+      properties:
+        empty:
+          type: boolean
+        first:
+          $ref: "#/components/schemas/JsonValue"
+        last:
+          $ref: "#/components/schemas/JsonValue"
+        valueType:
+          type: string
+          enum:
+          - ARRAY
+          - OBJECT
+          - STRING
+          - NUMBER
+          - "TRUE"
+          - "FALSE"
+          - "NULL"
+    JsonObject:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/JsonValue"
+      properties:
+        empty:
+          type: boolean
+        valueType:
+          type: string
+          enum:
+          - ARRAY
+          - OBJECT
+          - STRING
+          - NUMBER
+          - "TRUE"
+          - "FALSE"
+          - "NULL"
+    JsonValue:
+      type: object
+      properties:
+        valueType:
+          type: string
+          enum:
+          - ARRAY
+          - OBJECT
+          - STRING
+          - NUMBER
+          - "TRUE"
+          - "FALSE"
+          - "NULL"

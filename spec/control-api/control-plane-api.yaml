@@ -1,0 +1,104 @@
+openapi: 3.0.1
+paths:
+  /transferprocess/{processId}/complete:
+    post:
+      description: "Requests completion of the transfer process. Due to the asynchronous\
+        \ nature of transfers, a successful response only indicates that the request\
+        \ was successfully received"
+      operationId: complete
+      parameters:
+      - in: path
+        name: processId
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "Request was malformed, e.g. id was null"
+      tags:
+      - Transfer Process Control Api
+  /transferprocess/{processId}/fail:
+    post:
+      description: "Requests completion of the transfer process. Due to the asynchronous\
+        \ nature of transfers, a successful response only indicates that the request\
+        \ was successfully received"
+      operationId: fail
+      parameters:
+      - in: path
+        name: processId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferProcessFailStateDto"
+      responses:
+        "400":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "Request was malformed, e.g. id was null"
+      tags:
+      - Transfer Process Control Api
+  /transferprocess/{processId}/provisioned:
+    post:
+      description: Notify provisioning completion.
+      operationId: provisioned
+      parameters:
+      - in: path
+        name: processId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DataAddress"
+      responses:
+        "400":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "Request was malformed, e.g. id was null"
+      tags:
+      - Transfer Process Control Api
+components:
+  schemas:
+    ApiErrorDetail:
+      type: object
+      properties:
+        invalidValue:
+          type: object
+        message:
+          type: string
+        path:
+          type: string
+        type:
+          type: string
+    DataAddress:
+      type: object
+      properties:
+        properties:
+          type: object
+          additionalProperties:
+            type: object
+    TransferProcessFailStateDto:
+      type: object
+      properties:
+        errorMessage:
+          type: string
